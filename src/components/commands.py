@@ -5,6 +5,7 @@ import webbrowser
 import main
 import components.weatherInfo as weatherInfo
 import components.getNews as getNews
+from googletrans import Translator
 
 def takeCommand():
     r = sr.Recognizer()
@@ -16,11 +17,18 @@ def takeCommand():
         print("Recognizing...")
         query = r.recognize_google(audio, language='en-in')
         print(f"User said: {query}\n")
-
     except Exception as e:
         print("Say Again...")
         return "None"
     return query
+
+def translate_text(text, target_language):
+    translator = Translator()
+    try:
+        translated = translator.translate(text, dest=target_language)
+        return translated.text
+    except Exception as e:
+        return "Sorry, I couldn't translate that."
 
 def commands():
     query = takeCommand().lower()
@@ -79,6 +87,30 @@ def commands():
         print(results)
         main.speak("According to wikipedia")
         main.speak(results)
+
+    elif 'translate' in query:
+        main.speak("Please say what you want to translate")
+        text_to_translate = takeCommand()
+        main.speak("Which language should I translate to? Please specify")
+        target_language = takeCommand().lower()
+
+        try:
+            lang_code = {
+                'spanish': 'es',
+                'french': 'fr',
+                'hindi': 'hi',
+                'german': 'de',
+                'italian': 'it',
+                'japanese': 'ja',
+                'chinese': 'zh-cn',
+                'russian': 'ru'
+            }.get(target_language, 'en')
+
+            translated_text = translate_text(text_to_translate, lang_code)
+            print(f"Translated Text: {translated_text}")
+            main.speak(f"Here is the translation in {target_language}: {translated_text}")
+        except Exception as e:
+            main.speak("Sorry, I couldn't translate the text.")
 
     elif 'i have' in query or 'i am experiencing' in query or 'symptom' in query or 'i think' in query:
         main.speak("Let me check potential remedies for you...")
